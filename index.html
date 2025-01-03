@@ -1,0 +1,298 @@
+<html>
+ <head>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+            const addButton = document.getElementById('add-button');
+            const addSiteForm = document.getElementById('add-site-form');
+            const siteContainer = document.getElementById('site-container');
+            const submitButton = document.getElementById('submit-button');
+            const titleInput = document.getElementById('title-input');
+            const linkInput = document.getElementById('link-input');
+            const colorInput = document.getElementById('color-input');
+            const closeButton = document.getElementById('close-button');
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+
+            // Function to create a bookmark element
+            function createSiteElement(title, link, color) {
+                const newSite = document.createElement('div');
+                newSite.className = 'site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95';
+                newSite.innerHTML = `
+                    <div class="absolute top-0 left-0 right-0 h-1 ${color} rounded-t"></div>
+                    <a href="${link}" target="_blank" class="block">
+                        ${getIconForLink(link)}
+                        <p class="mt-2">${title}</p>
+                    </a>
+                    <button class="absolute top-2 right-2 text-white delete-button">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                return newSite;
+            }
+
+            // Function to get the appropriate icon for a given link
+            function getIconForLink(link) {
+                const domain = new URL(link).hostname;
+                if (domain.includes('github.com')) {
+                    return '<i class="fab fa-github text-4xl text-white"></i>';
+                } else if (domain.includes('youtube.com')) {
+                    return '<i class="fab fa-youtube text-4xl text-white"></i>';
+                } else if (domain.includes('reddit.com')) {
+                    return '<i class="fab fa-reddit text-4xl text-white"></i>';
+                } else if (domain.includes('chat.openai.com')) {
+                    return '<i class="fas fa-brain text-4xl text-white"></i>';
+                } else if (domain.includes('discord.com')) {
+                    return '<i class="fab fa-discord text-4xl text-white"></i>';
+                } else if (domain.includes('facebook.com')) {
+                    return '<i class="fab fa-facebook text-4xl text-white"></i>';
+                } else if (domain.includes('aliexpress.com')) {
+                    return '<i class="fab fa-alipay text-4xl text-white"></i>';
+                } else if (link.includes('mailto:')) {
+                    return '<i class="fas fa-envelope text-4xl text-white"></i>';
+                } else {
+                    return '<i class="fas fa-link text-4xl text-white"></i>';
+                }
+            }
+
+            // Function to load bookmarks from localStorage
+            function loadBookmarks() {
+                const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+                bookmarks.forEach(bookmark => {
+                    const siteElement = createSiteElement(bookmark.title, bookmark.link, bookmark.color);
+                    siteContainer.insertBefore(siteElement, addButton);
+                });
+            }
+
+            // Function to save a bookmark to localStorage
+            function saveBookmark(title, link, color) {
+                const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+                bookmarks.push({ title, link, color });
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            }
+
+            // Function to delete a bookmark from localStorage
+            function deleteBookmark(title) {
+                let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+                bookmarks = bookmarks.filter(bookmark => bookmark.title !== title);
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            }
+
+            addButton.addEventListener('click', () => {
+                addSiteForm.classList.remove('hidden');
+            });
+
+            closeButton.addEventListener('click', () => {
+                addSiteForm.classList.add('hidden');
+            });
+
+            addSiteForm.addEventListener('click', (e) => {
+                if (e.target === addSiteForm) {
+                    addSiteForm.classList.add('hidden');
+                }
+            });
+
+            submitButton.addEventListener('click', () => {
+                const title = titleInput.value;
+                const link = linkInput.value;
+                const color = colorInput.value;
+
+                if (title && link && color) {
+                    const siteElement = createSiteElement(title, link, color);
+                    siteContainer.insertBefore(siteElement, addButton);
+                    saveBookmark(title, link, color);
+                    addSiteForm.classList.add('hidden');
+                    titleInput.value = '';
+                    linkInput.value = '';
+                    colorInput.value = '';
+                }
+            });
+
+            siteContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-button')) {
+                    const siteItem = e.target.closest('.site-item');
+                    const title = siteItem.querySelector('p').textContent;
+                    siteItem.classList.add('opacity-0', 'transition', 'duration-500');
+                    setTimeout(() => {
+                        siteItem.remove();
+                        deleteBookmark(title);
+                    }, 500);
+                }
+            });
+
+            // Function to handle search
+            function handleSearch() {
+                const query = searchInput.value;
+                if (query) {
+                    window.location.href = `https://www.google.com/search?q=${query}`;
+                }
+            }
+
+            searchButton.addEventListener('click', handleSearch);
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+
+            loadBookmarks();
+        });
+  </script>
+ </head>
+ <body class="flex items-center justify-center h-screen bg-gray-900 bg-opacity-50">
+  <img alt="A scenic background image with mountains and a clear sky" class="absolute inset-0 w-full h-full object-cover z-0" height="600" src="https://storage.googleapis.com/a1aa/image/CxzSt83PeVRHSy2d9nSm2yT4l5fk0eShTSa2cv5JMRorACDoA.jpg" width="800"/>
+  <div class="relative z-10 text-center text-white">
+   <h1 class="text-4xl font-bold mb-8">
+    Good evening
+   </h1>
+   <div class="relative mb-8">
+    <input class="w-full px-4 py-2 pl-10 rounded bg-gray-700 text-white focus:outline-none" id="search-input" placeholder="search..." type="text"/>
+    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-teal-400 cursor-pointer" id="search-button">
+    </i>
+   </div>
+   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="site-container">
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-yellow-500 rounded-t">
+     </div>
+     <a class="block" href="mailto:someone@example.com" target="_blank">
+      <i class="fas fa-envelope text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       Email
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500 rounded-t">
+     </div>
+     <a class="block" href="https://github.com" target="_blank">
+      <i class="fab fa-github text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       GitHub
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-red-500 rounded-t">
+     </div>
+     <a class="block" href="https://youtube.com" target="_blank">
+      <i class="fab fa-youtube text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       YouTube
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-orange-500 rounded-t">
+     </div>
+     <a class="block" href="https://reddit.com" target="_blank">
+      <i class="fab fa-reddit text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       Reddit
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-teal-500 rounded-t">
+     </div>
+     <a class="block" href="https://chat.openai.com" target="_blank">
+      <i class="fas fa-brain text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       ChatGPT
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="site-item relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500 rounded-t">
+     </div>
+     <a class="block" href="https://discord.com" target="_blank">
+      <i class="fab fa-discord text-4xl text-white">
+      </i>
+      <p class="mt-2">
+       Discord
+      </p>
+     </a>
+     <button class="absolute top-2 right-2 text-white delete-button">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+    </div>
+    <div class="relative bg-gray-700 p-4 rounded transition transform hover:scale-105 active:scale-95 flex flex-col items-center justify-center cursor-pointer" id="add-button">
+     <div class="absolute top-0 left-0 right-0 h-1 bg-green-500 rounded-t">
+     </div>
+     <i class="fas fa-plus text-4xl text-white mb-2">
+     </i>
+     <p class="mt-2">
+      Add Site
+     </p>
+    </div>
+   </div>
+   <div class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75" id="add-site-form">
+    <div class="relative bg-gray-800 p-8 rounded w-96">
+     <button class="absolute top-2 right-2 text-white" id="close-button">
+      <i class="fas fa-times">
+      </i>
+     </button>
+     <h2 class="text-2xl mb-4">
+      Add a New Site
+     </h2>
+     <div class="mb-4">
+      <input class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none" id="title-input" placeholder="Site Title" type="text"/>
+     </div>
+     <div class="mb-4">
+      <input class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none" id="link-input" placeholder="Site Link" type="text"/>
+     </div>
+     <div class="mb-4">
+      <select class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none" id="color-input">
+       <option value="bg-blue-500">
+        Blue
+       </option>
+       <option value="bg-red-500">
+        Red
+       </option>
+       <option value="bg-orange-500">
+        Orange
+       </option>
+       <option value="bg-teal-500">
+        Teal
+       </option>
+       <option value="bg-green-500">
+        Green
+       </option>
+      </select>
+     </div>
+     <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" id="submit-button">
+      Add Site
+     </button>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>
